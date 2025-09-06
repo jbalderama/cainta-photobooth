@@ -63,7 +63,7 @@
             <div class="space-y-2">
                 <div>
                     <label class="block text-xs text-gray-600 mb-1">Border Width (px):</label>
-                    <input type="number" id="borderWidth" value="0" min="0" max="20" class="w-full p-2 border rounded text-sm">
+                    <input type="number" id="borderWidth" value="5" min="0" max="20" class="w-full p-2 border rounded text-sm">
                 </div>
                 <div>
                     <label class="block text-xs text-gray-600 mb-1">Border Color:</label>
@@ -197,7 +197,7 @@
                 this.backgroundImage = null;
                 this.currentPage = 1;
                 this.photosPerPage = 12;
-                this.borderWidth = 0;
+                this.borderWidth = 5;
                 this.borderColor = '#ffffff';
                 this.borderStyle = 'solid';
                 
@@ -361,7 +361,7 @@
                         { position: 'absolute', left: '45px', bottom: '15px', width: `${previewQuarterWidth * 1.28}px`, height: `${previewQuarterHeight * 1.42}px` }, // Picture 1: 1.8x quarter frame
                         { position: 'absolute', right: '41px', top: '21.7px', width: `${previewQuarterWidth * 1.28}px`, height: `${previewQuarterHeight * 1.42}px` }, // Picture 2: 1.4x width, 1.5x height
                         { position: 'absolute', right: '41px', bottom: '15px', width: `${previewQuarterWidth * 1.28}px`, height: `${previewQuarterHeight * 1.42}px` } // Picture 3: 1.4x width, 1.5x height
-                    ];
+                ]
                     
                     for (let i = 0; i < 3; i++) {
                         const slot = document.createElement('div');
@@ -809,6 +809,31 @@
                 });
             }
             
+            handlePageUnload(event) {
+                // Only trigger if there are photos in the gallery
+                if (this.allPhotos.length > 0) {
+                    // Automatically download all photos
+                    this.downloadAllPhotos();
+                    
+                    const message = `Downloading all ${this.allPhotos.length} photo(s) automatically! Please wait for downloads to complete before closing.`;
+                    event.preventDefault();
+                    event.returnValue = message; // For older browsers
+                    return message;
+                }
+            }
+            
+            downloadAllPhotos() {
+                // Download all photos with a small delay between each to avoid browser blocking
+                this.allPhotos.forEach((photo, index) => {
+                    setTimeout(() => {
+                        const link = document.createElement('a');
+                        link.download = `photobooth-${index + 1}-${Date.now()}.jpg`;
+                        link.href = photo;
+                        link.click();
+                    }, index * 200); // 200ms delay between downloads
+                });
+            }
+            
             delay(ms) {
                 return new Promise(resolve => setTimeout(resolve, ms));
             }
@@ -819,5 +844,5 @@
             new Photobooth();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97afb5c850efbc3d',t:'MTc1NzE3OTk5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97b028513751bc3d',t:'MTc1NzE4NDY4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
