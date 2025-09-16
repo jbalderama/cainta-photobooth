@@ -51,19 +51,19 @@
             <button id="clearBackground" class="mt-2 px-3 py-1 bg-red-500 text-white rounded text-sm">Clear Background</button>
         </div>
         
-        <!-- Settings -->
-        <div class="mb-4">
+        <!-- Settings (Hidden) -->
+        <div class="mb-4 hidden">
             <label class="block text-sm font-medium mb-2">Photos per Layout:</label>
             <input type="number" id="photosPerLayout" value="3" min="1" max="6" class="w-full p-2 border rounded">
         </div>
         
-        <!-- Photo Border Settings -->
-        <div class="mb-4">
+        <!-- Photo Border Settings (Hidden) -->
+        <div class="mb-4 hidden">
             <label class="block text-sm font-medium mb-2">Photo Border:</label>
             <div class="space-y-2">
                 <div>
                     <label class="block text-xs text-gray-600 mb-1">Border Width (px):</label>
-                    <input type="number" id="borderWidth" value="0" min="0" max="20" class="w-full p-2 border rounded text-sm">
+                    <input type="number" id="borderWidth" value="5" min="0" max="20" class="w-full p-2 border rounded text-sm">
                 </div>
                 <div>
                     <label class="block text-xs text-gray-600 mb-1">Border Color:</label>
@@ -84,94 +84,99 @@
             </div>
         </div>
         
+        <!-- Top Layer Overlay -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium mb-2">Top Layer Overlay:</label>
+            <input type="file" id="topLayerUpload" accept="image/*" class="w-full p-2 border rounded">
+            <button id="clearTopLayer" class="mt-2 px-3 py-1 bg-red-500 text-white rounded text-sm">Clear Top Layer</button>
+            <div class="mt-2 hidden">
+                <label class="block text-xs text-gray-600 mb-1">Opacity (%):</label>
+                <input type="range" id="topLayerOpacity" min="0" max="100" value="100" class="w-full">
+                <span id="opacityValue" class="text-xs text-gray-600">100%</span>
+            </div>
+        </div>
+        
+        <!-- Auto Download Settings -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium mb-2">Auto Download:</label>
+            <div class="space-y-2">
+                <label class="flex items-center">
+                    <input type="checkbox" id="autoDownloadEnabled" checked class="mr-2">
+                    <span class="text-sm">Auto-download after photoshoot</span>
+                </label>
+                <div class="ml-6">
+                    <label class="block text-xs text-gray-600 mb-1">Download delay (seconds):</label>
+                    <input type="number" id="downloadDelay" value="3" min="0" max="10" class="w-full p-2 border rounded text-sm">
+                    <p class="text-xs text-gray-500 mt-1">Time to wait after photoshoot before auto-download</p>
+                </div>
+            </div>
+        </div>
+        
         <button id="closeAdmin" class="w-full bg-gray-500 text-white py-2 rounded">Close Admin</button>
     </div>
 
-    <!-- Main Interface -->
-    <div class="container mx-auto px-4 py-8">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-5xl font-bold text-white mb-4">📸 Photobooth</h1>
-            <button id="adminToggle" class="bg-gray-800 text-white px-4 py-2 rounded-lg">Admin Panel</button>
-        </div>
-
-        <!-- Camera Section -->
-        <div id="cameraSection" class="bg-white rounded-2xl p-6 mb-8 shadow-2xl">
-            <div class="flex flex-col lg:flex-row gap-6">
-                <!-- Live Camera Feed -->
-                <div class="flex-1">
-                    <div class="relative bg-black rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
-                        <video id="cameraFeed" class="w-full h-full object-cover" autoplay muted></video>
-                        <canvas id="captureCanvas" class="hidden"></canvas>
-                        
-                        <!-- Countdown Overlay -->
-                        <div id="countdownOverlay" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-                            <div id="countdownNumber" class="countdown text-white font-bold">5</div>
+    <!-- Camera Section (Fullscreen by default) -->
+    <div id="cameraSection" class="fixed inset-0 bg-black z-40">
+            <!-- Live Camera Feed (Fullscreen) -->
+            <div class="relative w-full h-full">
+                <video id="cameraFeed" class="w-full h-full object-cover" autoplay muted></video>
+                <canvas id="captureCanvas" class="hidden"></canvas>
+                
+                <!-- Layout Preview Overlay -->
+                <div class="absolute top-4 right-4 z-50">
+                    <div class="bg-black bg-opacity-70 rounded-lg p-4 backdrop-blur-sm">
+                        <h3 class="text-white text-sm font-bold mb-2">Layout Preview</h3>
+                        <div id="layoutPreview" class="photo-frame bg-white" style="width: 200px; height: 133px;">
+                            <div id="photoSlots" class="h-full flex gap-1 p-1">
+                                <!-- Photo slots will be generated here -->
+                            </div>
                         </div>
                         
-                        <!-- Flash Effect -->
-                        <div id="flashEffect" class="absolute inset-0 pointer-events-none"></div>
+                        <!-- Progress -->
+                        <div class="mt-2">
+                            <div class="flex justify-between text-xs text-white mb-1">
+                                <span>Progress</span>
+                                <span id="progressText">0/3 photos</span>
+                            </div>
+                            <div class="w-full bg-gray-600 rounded-full h-1">
+                                <div id="progressBar" class="bg-blue-400 h-1 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <!-- Camera Controls -->
-                    <div class="flex justify-center mt-4 gap-4">
-                        <button id="startCamera" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold text-lg">
+                </div>
+                
+                <!-- Camera Controls Overlay -->
+                <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+                    <div class="flex gap-4">
+                        <button id="startCamera" class="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full font-bold text-xl shadow-2xl">
                             📹 Start Camera
                         </button>
-                        <button id="startPhotoshoot" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-bold text-lg hidden">
+                        <button id="startPhotoshoot" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-full font-bold text-xl shadow-2xl hidden">
                             📸 Start Photoshoot
                         </button>
-                        <button id="stopPhotoshoot" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-bold text-lg hidden">
+                        <button id="stopPhotoshoot" class="bg-red-500 hover:bg-red-600 text-white px-8 py-4 rounded-full font-bold text-xl shadow-2xl hidden">
                             ⏹️ Stop
                         </button>
                     </div>
                 </div>
-
-                <!-- Layout Preview -->
-                <div class="flex-1">
-                    <h3 class="text-xl font-bold mb-4">Current Layout Preview</h3>
-                    <div id="layoutPreview" class="photo-frame mx-auto bg-white" style="width: 300px; height: 200px;">
-                        <div id="photoSlots" class="h-full flex gap-2 p-2">
-                            <!-- Photo slots will be generated here -->
-                        </div>
-                    </div>
-                    
-                    <!-- Progress -->
-                    <div class="mt-4">
-                        <div class="flex justify-between text-sm text-gray-600 mb-2">
-                            <span>Progress</span>
-                            <span id="progressText">0/3 photos</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div id="progressBar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-                        </div>
-                    </div>
+                
+                <!-- Top Controls -->
+                <div class="absolute top-4 left-4 flex gap-2 z-50">
+                    <button id="adminToggle" class="bg-black bg-opacity-70 text-white px-4 py-2 rounded-full hover:bg-opacity-90 transition-all">
+                        Admin Panel
+                    </button>
                 </div>
+                
+                <!-- Countdown Overlay -->
+                <div id="countdownOverlay" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-60">
+                    <div id="countdownNumber" class="countdown text-white font-bold">5</div>
+                </div>
+                
+                <!-- Flash Effect -->
+                <div id="flashEffect" class="absolute inset-0 pointer-events-none z-60"></div>
             </div>
         </div>
 
-        <!-- Photo Gallery -->
-        <div class="bg-white rounded-2xl p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Photo Gallery</h2>
-                <div class="flex gap-2">
-                    <button id="clearGallery" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Clear All</button>
-                    <span id="photoCount" class="bg-gray-100 px-3 py-2 rounded">0 photos</span>
-                </div>
-            </div>
-            
-            <!-- Photo Grid -->
-            <div id="photoGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-                <!-- Photos will be added here -->
-            </div>
-            
-            <!-- Pagination -->
-            <div id="pagination" class="flex justify-center items-center gap-2 hidden">
-                <button id="prevPage" class="bg-gray-300 hover:bg-gray-400 px-3 py-2 rounded">Previous</button>
-                <span id="pageInfo" class="px-4 py-2">Page 1 of 1</span>
-                <button id="nextPage" class="bg-gray-300 hover:bg-gray-400 px-3 py-2 rounded">Next</button>
-            </div>
-        </div>
     </div>
 
     <!-- Photo Popup Modal -->
@@ -197,9 +202,13 @@
                 this.backgroundImage = null;
                 this.currentPage = 1;
                 this.photosPerPage = 12;
-                this.borderWidth = 0;
+                this.borderWidth = 5;
                 this.borderColor = '#ffffff';
                 this.borderStyle = 'solid';
+                this.topLayerImage = null;
+                this.topLayerOpacity = 100;
+                this.autoDownloadEnabled = true;
+                this.downloadDelay = 3;
                 
                 this.initializeElements();
                 this.setupEventListeners();
@@ -219,6 +228,12 @@
                     borderColor: document.getElementById('borderColor'),
                     borderColorText: document.getElementById('borderColorText'),
                     borderStyle: document.getElementById('borderStyle'),
+                    topLayerUpload: document.getElementById('topLayerUpload'),
+                    clearTopLayer: document.getElementById('clearTopLayer'),
+                    topLayerOpacity: document.getElementById('topLayerOpacity'),
+                    opacityValue: document.getElementById('opacityValue'),
+                    autoDownloadEnabled: document.getElementById('autoDownloadEnabled'),
+                    downloadDelay: document.getElementById('downloadDelay'),
                     cameraFeed: document.getElementById('cameraFeed'),
                     captureCanvas: document.getElementById('captureCanvas'),
                     startCamera: document.getElementById('startCamera'),
@@ -231,13 +246,7 @@
                     photoSlots: document.getElementById('photoSlots'),
                     progressText: document.getElementById('progressText'),
                     progressBar: document.getElementById('progressBar'),
-                    photoGrid: document.getElementById('photoGrid'),
-                    photoCount: document.getElementById('photoCount'),
-                    clearGallery: document.getElementById('clearGallery'),
-                    pagination: document.getElementById('pagination'),
-                    prevPage: document.getElementById('prevPage'),
-                    nextPage: document.getElementById('nextPage'),
-                    pageInfo: document.getElementById('pageInfo'),
+
                     photoPopup: document.getElementById('photoPopup'),
                     popupImage: document.getElementById('popupImage'),
                     closePopup: document.getElementById('closePopup')
@@ -255,12 +264,15 @@
                 this.elements.borderColor.addEventListener('input', (e) => this.updateBorderSettings());
                 this.elements.borderColorText.addEventListener('input', (e) => this.updateBorderSettings());
                 this.elements.borderStyle.addEventListener('change', (e) => this.updateBorderSettings());
+                this.elements.topLayerUpload.addEventListener('change', (e) => this.handleTopLayerUpload(e));
+                this.elements.clearTopLayer.addEventListener('click', () => this.clearTopLayer());
+                this.elements.topLayerOpacity.addEventListener('input', (e) => this.updateTopLayerOpacity(e));
+                this.elements.autoDownloadEnabled.addEventListener('change', (e) => this.updateAutoDownloadSettings());
+                this.elements.downloadDelay.addEventListener('input', (e) => this.updateAutoDownloadSettings());
                 this.elements.startCamera.addEventListener('click', () => this.startCamera());
                 this.elements.startPhotoshoot.addEventListener('click', () => this.startPhotoshoot());
                 this.elements.stopPhotoshoot.addEventListener('click', () => this.stopPhotoshoot());
-                this.elements.clearGallery.addEventListener('click', () => this.clearGallery());
-                this.elements.prevPage.addEventListener('click', () => this.changePage(-1));
-                this.elements.nextPage.addEventListener('click', () => this.changePage(1));
+
                 this.elements.closePopup.addEventListener('click', () => this.hidePhotoPopup());
                 this.elements.photoPopup.addEventListener('click', (e) => {
                     if (e.target === this.elements.photoPopup) {
@@ -268,8 +280,9 @@
                     }
                 });
                 
-                // Add beforeunload event to warn about unsaved photos
-                window.addEventListener('beforeunload', (e) => this.handlePageUnload(e));
+
+                
+
             }
             
             toggleAdmin() {
@@ -324,6 +337,35 @@
                 this.updateLayoutPreview();
             }
             
+            handleTopLayerUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.topLayerImage = e.target.result;
+                        this.updateLayoutPreview();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+            
+            clearTopLayer() {
+                this.topLayerImage = null;
+                this.elements.topLayerUpload.value = '';
+                this.updateLayoutPreview();
+            }
+            
+            updateTopLayerOpacity(event) {
+                this.topLayerOpacity = parseInt(event.target.value);
+                this.elements.opacityValue.textContent = `${this.topLayerOpacity}%`;
+                this.updateLayoutPreview();
+            }
+            
+            updateAutoDownloadSettings() {
+                this.autoDownloadEnabled = this.elements.autoDownloadEnabled.checked;
+                this.downloadDelay = parseInt(this.elements.downloadDelay.value) || 3;
+            }
+            
             updateLayoutPreview() {
                 const preview = this.elements.layoutPreview;
                 const slots = this.elements.photoSlots;
@@ -357,11 +399,11 @@
                     const previewQuarterWidth = 400 / 4; // 100px
                     const previewQuarterHeight = 267 / 4; // ~67px
                     
-                    const positions = [
+                   const positions = [
                         { position: 'absolute', left: '45px', bottom: '15px', width: `${previewQuarterWidth * 1.28}px`, height: `${previewQuarterHeight * 1.42}px` }, // Picture 1: 1.8x quarter frame
                         { position: 'absolute', right: '41px', top: '21.7px', width: `${previewQuarterWidth * 1.28}px`, height: `${previewQuarterHeight * 1.42}px` }, // Picture 2: 1.4x width, 1.5x height
                         { position: 'absolute', right: '41px', bottom: '15px', width: `${previewQuarterWidth * 1.28}px`, height: `${previewQuarterHeight * 1.42}px` } // Picture 3: 1.4x width, 1.5x height
-                ]
+                    ];
                     
                     for (let i = 0; i < 3; i++) {
                         const slot = document.createElement('div');
@@ -415,6 +457,23 @@
                         
                         slots.appendChild(slot);
                     }
+                }
+                
+                // Add top layer overlay if present
+                if (this.topLayerImage) {
+                    const topLayer = document.createElement('div');
+                    topLayer.style.position = 'absolute';
+                    topLayer.style.top = '0';
+                    topLayer.style.left = '0';
+                    topLayer.style.width = '100%';
+                    topLayer.style.height = '100%';
+                    topLayer.style.backgroundImage = `url(${this.topLayerImage})`;
+                    topLayer.style.backgroundSize = 'cover';
+                    topLayer.style.backgroundPosition = 'center';
+                    topLayer.style.opacity = this.topLayerOpacity / 100;
+                    topLayer.style.pointerEvents = 'none';
+                    topLayer.style.zIndex = '10';
+                    slots.appendChild(topLayer);
                 }
                 
                 this.updateProgress();
@@ -519,10 +578,37 @@
             async completePhotoshoot() {
                 // Create final layout
                 const finalLayout = await this.createFinalLayout();
-                this.allPhotos.unshift(finalLayout);
                 
-                this.updateGallery();
-                this.stopPhotoshoot();
+                // Always auto-download the photo immediately
+                this.showAutoDownloadCountdown(finalLayout);
+            }
+            
+            showAutoDownloadCountdown(photoData) {
+                // Show countdown overlay with download message
+                this.elements.countdownOverlay.classList.remove('hidden');
+                
+                let count = this.downloadDelay;
+                this.elements.countdownNumber.textContent = `Auto-downloading in ${count}...`;
+                this.elements.countdownNumber.style.fontSize = '3rem'; // Smaller text for longer message
+                
+                const interval = setInterval(() => {
+                    count--;
+                    if (count > 0) {
+                        this.elements.countdownNumber.textContent = `Auto-downloading in ${count}...`;
+                    } else {
+                        this.elements.countdownNumber.textContent = 'Downloading!';
+                        setTimeout(() => {
+                            // Download the photo with timestamp
+                            this.downloadPhoto(photoData, Date.now());
+                            
+                            // Hide overlay and stop photoshoot
+                            this.elements.countdownOverlay.classList.add('hidden');
+                            this.elements.countdownNumber.style.fontSize = '8rem'; // Reset font size
+                            this.stopPhotoshoot();
+                            clearInterval(interval);
+                        }, 500);
+                    }
+                }, 1000);
             }
             
             createFinalLayout() {
@@ -545,7 +631,9 @@
                         bgImg.onload = () => {
                             ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
                             this.drawPhotosOnCanvasAsync(ctx, canvas).then(() => {
-                                resolve(canvas.toDataURL('image/jpeg', 0.9));
+                                this.drawTopLayerOnCanvas(ctx, canvas).then(() => {
+                                    resolve(canvas.toDataURL('image/jpeg', 0.9));
+                                });
                             });
                         };
                         bgImg.src = this.backgroundImage;
@@ -553,7 +641,9 @@
                         ctx.fillStyle = '#f0f0f0';
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         this.drawPhotosOnCanvasAsync(ctx, canvas).then(() => {
-                            resolve(canvas.toDataURL('image/jpeg', 0.9));
+                            this.drawTopLayerOnCanvas(ctx, canvas).then(() => {
+                                resolve(canvas.toDataURL('image/jpeg', 0.9));
+                            });
                         });
                     }
                 });
@@ -576,7 +666,7 @@
                         const quarterFrameHeight = canvas.height / 4;
                         
                         // Photo positions for 6x4 layout - ADJUST THESE VALUES TO CHANGE OUTPUT POSITIONS
-                        const positions = [
+                         const positions = [
                             // Picture 1 (lower left): Change x=25 (left distance), y calculation (bottom distance), width/height multipliers
                             { x: 71.5, y: canvas.height - (quarterFrameHeight * 1.60) - 14, width: quarterFrameWidth * 1.32, height: quarterFrameHeight * 1.45 },
                             
@@ -596,29 +686,7 @@
                                     // Draw photo
                                     ctx.drawImage(img, pos.x, pos.y, pos.width, pos.height);
                                     
-                                    // Draw border if enabled
-                                    if (this.borderWidth > 0) {
-                                        ctx.strokeStyle = this.borderColor;
-                                        ctx.lineWidth = this.borderWidth;
-                                        
-                                        // Set line dash pattern based on border style
-                                        if (this.borderStyle === 'dashed') {
-                                            ctx.setLineDash([10, 5]);
-                                        } else if (this.borderStyle === 'dotted') {
-                                            ctx.setLineDash([2, 3]);
-                                        } else {
-                                            ctx.setLineDash([]);
-                                        }
-                                        
-                                        ctx.strokeRect(pos.x, pos.y, pos.width, pos.height);
-                                        
-                                        // Draw double border if selected
-                                        if (this.borderStyle === 'double' && this.borderWidth >= 6) {
-                                            const innerOffset = Math.floor(this.borderWidth / 3);
-                                            ctx.strokeRect(pos.x + innerOffset, pos.y + innerOffset, 
-                                                         pos.width - (innerOffset * 2), pos.height - (innerOffset * 2));
-                                        }
-                                    }
+
                                     
                                     loadedCount++;
                                     if (loadedCount === totalPhotos) resolve();
@@ -643,29 +711,7 @@
                                     // Draw photo
                                     ctx.drawImage(img, x, y, photoWidth, photoHeight);
                                     
-                                    // Draw border if enabled
-                                    if (this.borderWidth > 0) {
-                                        ctx.strokeStyle = this.borderColor;
-                                        ctx.lineWidth = this.borderWidth;
-                                        
-                                        // Set line dash pattern based on border style
-                                        if (this.borderStyle === 'dashed') {
-                                            ctx.setLineDash([10, 5]);
-                                        } else if (this.borderStyle === 'dotted') {
-                                            ctx.setLineDash([2, 3]);
-                                        } else {
-                                            ctx.setLineDash([]);
-                                        }
-                                        
-                                        ctx.strokeRect(x, y, photoWidth, photoHeight);
-                                        
-                                        // Draw double border if selected
-                                        if (this.borderStyle === 'double' && this.borderWidth >= 6) {
-                                            const innerOffset = Math.floor(this.borderWidth / 3);
-                                            ctx.strokeRect(x + innerOffset, y + innerOffset, 
-                                                         photoWidth - (innerOffset * 2), photoHeight - (innerOffset * 2));
-                                        }
-                                    }
+
                                     
                                     loadedCount++;
                                     if (loadedCount === totalPhotos) resolve();
@@ -674,6 +720,33 @@
                             }
                         });
                     }
+                });
+            }
+            
+            drawTopLayerOnCanvas(ctx, canvas) {
+                return new Promise((resolve) => {
+                    if (!this.topLayerImage) {
+                        resolve();
+                        return;
+                    }
+                    
+                    const topImg = new Image();
+                    topImg.onload = () => {
+                        // Save current context state
+                        ctx.save();
+                        
+                        // Set opacity for top layer
+                        ctx.globalAlpha = this.topLayerOpacity / 100;
+                        
+                        // Draw top layer covering entire canvas
+                        ctx.drawImage(topImg, 0, 0, canvas.width, canvas.height);
+                        
+                        // Restore context state
+                        ctx.restore();
+                        
+                        resolve();
+                    };
+                    topImg.src = this.topLayerImage;
                 });
             }
             
@@ -695,63 +768,7 @@
                 this.elements.progressText.textContent = `${this.currentPhotos.length}/${this.photosPerLayout} photos`;
             }
             
-            updateGallery() {
-                this.elements.photoCount.textContent = `${this.allPhotos.length} photos`;
-                
-                const startIndex = (this.currentPage - 1) * this.photosPerPage;
-                const endIndex = startIndex + this.photosPerPage;
-                const photosToShow = this.allPhotos.slice(startIndex, endIndex);
-                
-                this.elements.photoGrid.innerHTML = '';
-                
-                photosToShow.forEach((photo, index) => {
-                    const photoElement = document.createElement('div');
-                    photoElement.className = 'relative group cursor-pointer';
-                    photoElement.innerHTML = `
-                        <img src="${photo}" alt="Photo ${startIndex + index + 1}" class="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
-                            <button class="download-btn opacity-0 group-hover:opacity-100 bg-white text-black px-3 py-1 rounded-full text-sm font-medium transition-opacity">
-                                Download
-                            </button>
-                        </div>
-                    `;
-                    
-                    // Add click event for popup
-                    photoElement.addEventListener('click', (e) => {
-                        if (!e.target.classList.contains('download-btn')) {
-                            this.showPhotoPopup(photo);
-                        }
-                    });
-                    
-                    photoElement.querySelector('.download-btn').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        this.downloadPhoto(photo, startIndex + index + 1);
-                    });
-                    
-                    this.elements.photoGrid.appendChild(photoElement);
-                });
-                
-                this.updatePagination();
-            }
-            
-            updatePagination() {
-                const totalPages = Math.ceil(this.allPhotos.length / this.photosPerPage);
-                
-                if (totalPages > 1) {
-                    this.elements.pagination.classList.remove('hidden');
-                    this.elements.pageInfo.textContent = `Page ${this.currentPage} of ${totalPages}`;
-                    this.elements.prevPage.disabled = this.currentPage === 1;
-                    this.elements.nextPage.disabled = this.currentPage === totalPages;
-                } else {
-                    this.elements.pagination.classList.add('hidden');
-                }
-            }
-            
-            changePage(direction) {
-                const totalPages = Math.ceil(this.allPhotos.length / this.photosPerPage);
-                this.currentPage = Math.max(1, Math.min(totalPages, this.currentPage + direction));
-                this.updateGallery();
-            }
+
             
             downloadPhoto(photoData, index) {
                 const link = document.createElement('a');
@@ -760,18 +777,7 @@
                 link.click();
             }
             
-            clearGallery() {
-                const password = prompt('Enter password to clear gallery:');
-                if (password === '12345') {
-                    if (confirm('Are you sure you want to clear all photos?')) {
-                        this.allPhotos = [];
-                        this.currentPage = 1;
-                        this.updateGallery();
-                    }
-                } else if (password !== null) {
-                    alert('Incorrect password!');
-                }
-            }
+
             
             showPhotoPopup(photoSrc) {
                 this.elements.popupImage.src = photoSrc;
@@ -784,55 +790,7 @@
                 document.body.style.overflow = 'auto'; // Restore scrolling
             }
             
-            handlePageUnload(event) {
-                // Only trigger if there are photos in the gallery
-                if (this.allPhotos.length > 0) {
-                    // Automatically download all photos
-                    this.downloadAllPhotos();
-                    
-                    const message = `Downloading all ${this.allPhotos.length} photo(s) automatically! Please wait for downloads to complete before closing.`;
-                    event.preventDefault();
-                    event.returnValue = message; // For older browsers
-                    return message;
-                }
-            }
-            
-            downloadAllPhotos() {
-                // Download all photos with a small delay between each to avoid browser blocking
-                this.allPhotos.forEach((photo, index) => {
-                    setTimeout(() => {
-                        const link = document.createElement('a');
-                        link.download = `photobooth-${index + 1}-${Date.now()}.jpg`;
-                        link.href = photo;
-                        link.click();
-                    }, index * 200); // 200ms delay between downloads
-                });
-            }
-            
-            handlePageUnload(event) {
-                // Only trigger if there are photos in the gallery
-                if (this.allPhotos.length > 0) {
-                    // Automatically download all photos
-                    this.downloadAllPhotos();
-                    
-                    const message = `Downloading all ${this.allPhotos.length} photo(s) automatically! Please wait for downloads to complete before closing.`;
-                    event.preventDefault();
-                    event.returnValue = message; // For older browsers
-                    return message;
-                }
-            }
-            
-            downloadAllPhotos() {
-                // Download all photos with a small delay between each to avoid browser blocking
-                this.allPhotos.forEach((photo, index) => {
-                    setTimeout(() => {
-                        const link = document.createElement('a');
-                        link.download = `photobooth-${index + 1}-${Date.now()}.jpg`;
-                        link.href = photo;
-                        link.click();
-                    }, index * 200); // 200ms delay between downloads
-                });
-            }
+
             
             delay(ms) {
                 return new Promise(resolve => setTimeout(resolve, ms));
@@ -844,7 +802,5 @@
             new Photobooth();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97b028513751bc3d',t:'MTc1NzE4NDY4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98021472165ab9fc',t:'MTc1ODA0MzcwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
-
