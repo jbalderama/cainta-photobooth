@@ -122,28 +122,7 @@
                 <video id="cameraFeed" class="w-full h-full object-cover" autoplay muted></video>
                 <canvas id="captureCanvas" class="hidden"></canvas>
                 
-                <!-- Layout Preview Overlay -->
-                <div class="absolute top-4 right-4 z-50">
-                    <div class="bg-black bg-opacity-70 rounded-lg p-4 backdrop-blur-sm">
-                        <h3 class="text-white text-sm font-bold mb-2">Layout Preview</h3>
-                        <div id="layoutPreview" class="photo-frame bg-white" style="width: 200px; height: 133px;">
-                            <div id="photoSlots" class="h-full flex gap-1 p-1">
-                                <!-- Photo slots will be generated here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Progress -->
-                        <div class="mt-2">
-                            <div class="flex justify-between text-xs text-white mb-1">
-                                <span>Progress</span>
-                                <span id="progressText">0/3 photos</span>
-                            </div>
-                            <div class="w-full bg-gray-600 rounded-full h-1">
-                                <div id="progressBar" class="bg-blue-400 h-1 rounded-full transition-all duration-300" style="width: 0%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
                 
                 <!-- Camera Controls Overlay -->
                 <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-50">
@@ -177,6 +156,32 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Layout Preview Popup -->
+    <div id="layoutPreviewPopup" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="relative bg-white rounded-lg p-8 max-w-5xl max-h-screen">
+            <button id="closeLayoutPreview" class="absolute top-4 right-4 bg-gray-200 text-black rounded-full w-10 h-10 flex items-center justify-center text-2xl font-bold hover:bg-gray-300 z-10">
+                ×
+            </button>
+            <h3 class="text-2xl font-bold mb-6 text-center">Your Photo Strip</h3>
+            <div id="layoutPreview" class="photo-frame bg-white mx-auto" style="width: 800px; height: 533px;">
+                <div id="photoSlots" class="h-full flex gap-1 p-1">
+                    <!-- Photo slots will be generated here -->
+                </div>
+            </div>
+            
+            <!-- Progress -->
+            <div class="mt-6">
+                <div class="flex justify-between text-lg text-gray-700 mb-3">
+                    <span>Progress</span>
+                    <span id="progressText">0/3 photos</span>
+                </div>
+                <div class="w-full bg-gray-300 rounded-full h-3">
+                    <div id="progressBar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Photo Popup Modal -->
@@ -246,6 +251,8 @@
                     photoSlots: document.getElementById('photoSlots'),
                     progressText: document.getElementById('progressText'),
                     progressBar: document.getElementById('progressBar'),
+                    layoutPreviewPopup: document.getElementById('layoutPreviewPopup'),
+                    closeLayoutPreview: document.getElementById('closeLayoutPreview'),
 
                     photoPopup: document.getElementById('photoPopup'),
                     popupImage: document.getElementById('popupImage'),
@@ -277,6 +284,13 @@
                 this.elements.photoPopup.addEventListener('click', (e) => {
                     if (e.target === this.elements.photoPopup) {
                         this.hidePhotoPopup();
+                    }
+                });
+                
+                this.elements.closeLayoutPreview.addEventListener('click', () => this.hideLayoutPreview());
+                this.elements.layoutPreviewPopup.addEventListener('click', (e) => {
+                    if (e.target === this.elements.layoutPreviewPopup) {
+                        this.hideLayoutPreview();
                     }
                 });
                 
@@ -372,12 +386,12 @@
                 
                 // Update layout dimensions
                 if (this.layoutSize === '6x4') {
-                    preview.style.width = '400px';
-                    preview.style.height = '267px';
+                    preview.style.width = '800px';
+                    preview.style.height = '533px';
                     slots.className = 'h-full flex gap-2 p-2';
                 } else {
-                    preview.style.width = '200px';
-                    preview.style.height = '600px';
+                    preview.style.width = '400px';
+                    preview.style.height = '1200px';
                     slots.className = 'h-full flex flex-col gap-2 p-2';
                 }
                 
@@ -395,14 +409,14 @@
                 slots.style.position = 'relative';
                 
                 if (this.layoutSize === '6x4') {
-                    // 6x4 layout positioning - Custom sizing based on quarter frame
-                    const previewQuarterWidth = 400 / 4; // 100px
-                    const previewQuarterHeight = 267 / 4; // ~67px
+                    // 6x4 layout positioning - Custom sizing based on quarter frame (doubled for larger preview)
+                    const previewQuarterWidth = 800 / 4; // 200px
+                    const previewQuarterHeight = 533 / 4; // ~133px
                     
-                   const positions = [
-                        { position: 'absolute', left: '45px', bottom: '15px', width: `${previewQuarterWidth * 1.28}px`, height: `${previewQuarterHeight * 1.42}px` }, // Picture 1: 1.8x quarter frame
-                        { position: 'absolute', right: '41px', top: '21.7px', width: `${previewQuarterWidth * 1.28}px`, height: `${previewQuarterHeight * 1.42}px` }, // Picture 2: 1.4x width, 1.5x height
-                        { position: 'absolute', right: '41px', bottom: '15px', width: `${previewQuarterWidth * 1.28}px`, height: `${previewQuarterHeight * 1.42}px` } // Picture 3: 1.4x width, 1.5x height
+                    const positions = [
+                        { position: 'absolute', left: '50px', bottom: '30px', width: `${previewQuarterWidth * 1.8}px`, height: `${previewQuarterHeight * 1.8}px` }, // Picture 1: 1.8x quarter frame
+                        { position: 'absolute', right: '20px', top: '30px', width: `${previewQuarterWidth * 1.4}px`, height: `${previewQuarterHeight * 1.5}px` }, // Picture 2: 1.4x width, 1.5x height
+                        { position: 'absolute', right: '20px', bottom: '30px', width: `${previewQuarterWidth * 1.4}px`, height: `${previewQuarterHeight * 1.5}px` } // Picture 3: 1.4x width, 1.5x height
                     ];
                     
                     for (let i = 0; i < 3; i++) {
@@ -431,13 +445,13 @@
                         slots.appendChild(slot);
                     }
                 } else {
-                    // 2x6 layout - vertical stacking with space at bottom
-                    slots.style.paddingBottom = '80px'; // Space for background design at bottom
+                    // 2x6 layout - vertical stacking with space at bottom (larger preview)
+                    slots.style.paddingBottom = '160px'; // Space for background design at bottom
                     
                     for (let i = 0; i < 3; i++) {
                         const slot = document.createElement('div');
-                        slot.className = 'bg-gray-200 rounded border-2 border-dashed border-gray-400 flex items-center justify-center text-gray-500 text-sm mb-4';
-                        slot.style.height = '100px';
+                        slot.className = 'bg-gray-200 rounded border-2 border-dashed border-gray-400 flex items-center justify-center text-gray-500 text-lg mb-8';
+                        slot.style.height = '200px';
                         slot.textContent = `Photo ${i + 1}`;
                         
                         if (this.currentPhotos[i]) {
@@ -513,7 +527,7 @@
                     this.currentPhotoIndex = i;
                     
                     // Countdown (5 seconds for first, 3 seconds for others)
-                    const countdownTime = i === 0 ? 5 : 3;
+                    const countdownTime = i === 0 ? 1 : 1;
                     await this.showCountdown(countdownTime);
                     
                     if (!this.isCapturing) break;
@@ -576,11 +590,17 @@
             }
             
             async completePhotoshoot() {
+                // Show layout preview popup first
+                this.showLayoutPreview();
+                
                 // Create final layout
                 const finalLayout = await this.createFinalLayout();
                 
-                // Always auto-download the photo immediately
-                this.showAutoDownloadCountdown(finalLayout);
+                // Wait a moment then start auto-download countdown
+                setTimeout(() => {
+                    this.hideLayoutPreview();
+                    this.showAutoDownloadCountdown(finalLayout);
+                }, 3000); // Show preview for 3 seconds
             }
             
             showAutoDownloadCountdown(photoData) {
@@ -666,15 +686,15 @@
                         const quarterFrameHeight = canvas.height / 4;
                         
                         // Photo positions for 6x4 layout - ADJUST THESE VALUES TO CHANGE OUTPUT POSITIONS
-                         const positions = [
+                        const positions = [
                             // Picture 1 (lower left): Change x=25 (left distance), y calculation (bottom distance), width/height multipliers
-                            { x: 71.5, y: canvas.height - (quarterFrameHeight * 1.60) - 14, width: quarterFrameWidth * 1.32, height: quarterFrameHeight * 1.45 },
+                            { x: 25, y: canvas.height - (quarterFrameHeight * 1.8) - 15, width: quarterFrameWidth * 1.8, height: quarterFrameHeight * 1.8 },
                             
                             // Picture 2 (upper right): Change x calculation (right distance), y=15 (top distance), width/height multipliers  
-                            { x: canvas.width - (quarterFrameWidth * 1.70) - 8, y: 39, width: quarterFrameWidth * 1.32, height: quarterFrameHeight * 1.45 },
+                            { x: canvas.width - (quarterFrameWidth * 1.4) - 10, y: 15, width: quarterFrameWidth * 1.4, height: quarterFrameHeight * 1.5 },
                             
                             // Picture 3 (lower right): Change x calculation (right distance), y calculation (bottom distance), width/height multipliers
-                            { x: canvas.width - (quarterFrameWidth * 1.70) - 8, y: canvas.height - (quarterFrameHeight * 1.5) - 24, width: quarterFrameWidth * 1.32, height: quarterFrameHeight * 1.45 }
+                            { x: canvas.width - (quarterFrameWidth * 1.4) - 10, y: canvas.height - (quarterFrameHeight * 1.5) - 15, width: quarterFrameWidth * 1.4, height: quarterFrameHeight * 1.5 }
                         ];
                         
                         this.currentPhotos.forEach((photo, index) => {
@@ -790,6 +810,16 @@
                 document.body.style.overflow = 'auto'; // Restore scrolling
             }
             
+            showLayoutPreview() {
+                this.elements.layoutPreviewPopup.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            }
+            
+            hideLayoutPreview() {
+                this.elements.layoutPreviewPopup.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Restore scrolling
+            }
+            
 
             
             delay(ms) {
@@ -802,5 +832,5 @@
             new Photobooth();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98021472165ab9fc',t:'MTc1ODA0MzcwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9802302cb706bc45',t:'MTc1ODA0NDgzOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
